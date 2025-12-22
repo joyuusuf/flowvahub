@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../services/supabase";
 import { useRewards } from "../hooks/useRewards";
-import PointsCard from "../components/PointsCard";
-import StreakCard from "../components/StreakCard";
 import Loader from "../components/Loader";
+import AppLayout from "../components/AppLayout";
+import RewardsDashboard from "../components/RewardsDashboard";
+import ReferAndEarnPage from "../components/Referearn";
 
 export default function Rewards() {
   const [user, setUser] = useState(null);
@@ -47,13 +48,17 @@ export default function Rewards() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-6">Rewards Hub</h1>
+    <AppLayout>
+      <div className="max-w-4xl mx-auto p-6">
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <PointsCard points={rewards.points} />
-        <StreakCard streak={rewards.streak} onClaim={claimPoints} />
+        <RewardsDashboard
+          points={rewards.points}
+          streak={rewards.streak}
+          onClaim={claimPoints}
+        />
+
+        <ReferAndEarnPage/>
       </div>
-    </div>
+    </AppLayout>
   );
 }

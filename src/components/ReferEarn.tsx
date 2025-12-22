@@ -1,0 +1,124 @@
+import React from "react";
+import { Share2, Star, Users } from "lucide-react";
+
+export default function ReferEarn() {
+    return (
+        <div className="max-w-7xl mx-auto px-4 py-8 space-y-10 bg-gray">
+
+            {/* Earn More Points */}
+            <section className="space-y-5">
+                <div className="flex items-center gap-3">
+                    <span className="h-5 w-[2px] bg- rounded-full" />
+                    <h2 className="text-lg font-medium text-textMain">
+                        Earn More Points
+                    </h2>
+                </div>
+
+                <div className="grid md:grid-cols-2 gap-6">
+
+                    {/* Refer Card */}
+                    <div className=" transition-all duration-200 ease-out hover:-translate-y-1
+                                     hover:border-blue-500 hover:shadow-md border border-borderMain rounded-xl overflow-hidden">
+
+                        {/* TOP STRIP — must touch edges */}
+                        <div className="flex items-center gap-4 bg-white px-5 py-4">
+                            <div className="h-20 w-20 rounded-lg bg-[#FCF4FC] flex items-center justify-center">
+                                <Star className="h-8 w-8 text-[#8B5CF6]" />
+                            </div>
+
+                            <p className="font-medium text-textMain text-sm">
+                                Refer and win 10,000 points!
+                            </p>
+                        </div>
+
+                        {/* BOTTOM CONTENT */}
+                        <div className="bg-[#F9FAFB] px-5 py-4 border-t">
+                            <p className="text-sm text-textMuted leading-relaxed">
+                                Invite 3 friends by Nov 20 and earn a chance to be one of 5 winners of{" "}
+                                <span className="text-[#9013fe] font-medium">10,000 points</span>.
+                                Friends must complete onboarding to qualify.
+                            </p>
+                        </div>
+
+                    </div>
+
+
+                    {/* Share Stack */}
+                    <div className=" transition-all duration-200 ease-out hover:-translate-y-1 hover:border-blue-500
+                                    hover:shadow-md
+                                    border border-[#e5e7eb] rounded-xl bg-white overflow-hidden">
+
+                        {/* TOP CONTENT */}
+                        <div className="
+                        flex items-center gap-4 px-2 py-4 bg-white hover:border-[#e5e7eb]">
+                            <div className="h-20 w-20 rounded-lg bg-[#eef2ff] flex items-center justify-center">
+                                <Share2 className="h-8 w-8 text-[#8B5CF6]" />
+                            </div>
+
+                            <div>
+                                <p className="font-medium text-textMain text-sm">
+                                    Share Your Stack
+                                </p>
+                                <p className="text-xs text-textMuted">
+                                    Earn +25 pts
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* BOTTOM STRIP — must touch edges */}
+                        <div className="bg-[#f9fafb] px-6 py-10 flex border-t items-center justify-between">
+                            <p className="text-sm text-textMuted">
+                                Share your tool stack
+                            </p>
+
+                            <button className="flex items-center  hover:bg-[#6f0fcc] gap-2 px-4 py-2 rounded-full text-[#9013fe] hover:text-white text-sm font-medium hover:bg-violetIcon transition">
+                                <Share2 className="h-8 w-8" />
+                                Share
+                            </button>
+                        </div>
+
+                    </div>
+
+                </div>
+            </section>
+
+            {/* Refer & Earn */}
+            <section className="space-y-5">
+                <div className="flex items-center gap-3">
+                    <span className="h-5 w-[2px] bg-violetBrand rounded-full" />
+                    <h2 className="text-lg font-medium text-textMain">
+                        Refer & Earn
+                    </h2>
+                </div>
+
+                <div className="bg-softBg border border-borderSoft rounded-xl p-6 space-y-8">
+
+                    <div className="flex items-start gap-4">
+                        <div className="h-9 w-9 rounded-lg bg-violetIcon flex items-center justify-center">
+                            <Users className="h-4 w-4 text-violetBrand" />
+                        </div>
+                        <div>
+                            <p className="font-medium text-textMain text-sm">
+                                Share Your Link
+                            </p>
+                            <p className="text-sm text-textMuted">
+                                Invite friends and earn 25 points when they join!
+                            </p>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 text-center">
+                        <div>
+                            <p className="text-xl font-medium text-violetBrand">0</p>
+                            <p className="text-sm text-textMuted">Referrals</p>
+                        </div>
+                        <div>
+                            <p className="text-xl font-medium text-violetBrand">0</p>
+                            <p className="text-sm text-textMuted">Points Earned</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    );
+}

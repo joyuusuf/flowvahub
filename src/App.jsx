@@ -1,32 +1,12 @@
-// import { useEffect, useState } from "react";
-// import { supabase } from "./services/supabase";
-// import Login from "./pages/Login";
-// import Rewards from "./pages/Rewards";
-
-// export default function App() {
-//   const [session, setSession] = useState(null);
-
-//   useEffect(() => {
-//     supabase.auth.getSession().then(({ data }) => {
-//       setSession(data.session);
-//     });
-
-//     supabase.auth.onAuthStateChange((_event, session) => {
-//       setSession(session);
-//     });
-//   }, []);
-
-//   return session ? <Rewards /> : <Login />;
-// }
-
-
 import { useEffect, useState } from "react";
 import { supabase } from "./services/supabase";
 import Login from "./pages/Login";
 import Rewards from "./pages/Rewards";
+import "./App.css";
+
 
 export default function App() {
-  const [session, setSession] = useState(undefined); // NOT null
+  const [session, setSession] = useState(undefined);
 
   useEffect(() => {
     let mounted = true;
@@ -47,7 +27,6 @@ export default function App() {
     };
   }, []);
 
-  // 🔹 LOADING STATE (THIS FIXES BLANK SCREEN)
   if (session === undefined) {
     return (
       <div className="flex justify-center items-center h-screen">
@@ -58,4 +37,3 @@ export default function App() {
 
   return session ? <Rewards /> : <Login />;
 }
-
