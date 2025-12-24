@@ -6,21 +6,25 @@ export default function ReferEarn() {
         <div className="max-w-7xl mx-auto px-4 py-8 space-y-10 bg-gray">
 
             {/* Earn More Points */}
+
             <section className="space-y-5">
+                {/* Section title */}
                 <div className="flex items-center gap-3">
-                    <span className="h-5 w-[2px] bg- rounded-full" />
-                    <h2 className="text-lg font-medium text-textMain">
+                    {/* Blue thick bar */}
+                    <span className="h-6 w-[4px] bg-[#2563EB] rounded-full" />
+
+                    <h2 className="text-2xl font-bold text-black">
                         Earn More Points
                     </h2>
                 </div>
 
                 <div className="grid md:grid-cols-2 gap-6">
-
                     {/* Refer Card */}
-                    <div className=" transition-all duration-200 ease-out hover:-translate-y-1
-                                     hover:border-blue-500 hover:shadow-md border border-borderMain rounded-xl overflow-hidden">
-
-                        {/* TOP STRIP — must touch edges */}
+                    <div
+                        className="transition-all duration-200 ease-out hover:-translate-y-1
+                 hover:border-blue-500 hover:shadow-md border border-borderMain rounded-xl overflow-hidden"
+                    >
+                        {/* TOP STRIP */}
                         <div className="flex items-center gap-4 bg-white px-5 py-4">
                             <div className="h-20 w-20 rounded-lg bg-[#FCF4FC] flex items-center justify-center">
                                 <Star className="h-8 w-8 text-[#8B5CF6]" />
@@ -39,18 +43,15 @@ export default function ReferEarn() {
                                 Friends must complete onboarding to qualify.
                             </p>
                         </div>
-
                     </div>
 
-
                     {/* Share Stack */}
-                    <div className=" transition-all duration-200 ease-out hover:-translate-y-1 hover:border-blue-500
-                                    hover:shadow-md
-                                    border border-[#e5e7eb] rounded-xl bg-white overflow-hidden">
-
+                    <div
+                        className="transition-all duration-200 ease-out hover:-translate-y-1 hover:border-blue-500
+                 hover:shadow-md border border-[#e5e7eb] rounded-xl bg-white overflow-hidden"
+                    >
                         {/* TOP CONTENT */}
-                        <div className="
-                        flex items-center gap-4 px-2 py-4 bg-white hover:border-[#e5e7eb]">
+                        <div className="flex items-center gap-4 px-2 py-4 bg-white">
                             <div className="h-20 w-20 rounded-lg bg-[#eef2ff] flex items-center justify-center">
                                 <Share2 className="h-8 w-8 text-[#8B5CF6]" />
                             </div>
@@ -65,25 +66,26 @@ export default function ReferEarn() {
                             </div>
                         </div>
 
-                        {/* BOTTOM STRIP — must touch edges */}
+                        {/* BOTTOM STRIP */}
                         <div className="bg-[#f9fafb] px-6 py-10 flex border-t items-center justify-between">
                             <p className="text-sm text-textMuted">
                                 Share your tool stack
                             </p>
 
-                            <button className="flex items-center  hover:bg-[#6f0fcc] gap-2 px-4 py-2 rounded-full text-[#9013fe] hover:text-white text-sm font-medium hover:bg-violetIcon transition">
-                                <Share2 className="h-8 w-8" />
+                            <button className="flex items-center gap-2 px-6 py-2 rounded-full
+                           text-[#9013fe] hover:text-white text-sm font-medium
+                           hover:bg-[#6f0fcc] transition">
+                                <Share2 className="h-6 w-6" />
                                 Share
                             </button>
                         </div>
-
                     </div>
-
                 </div>
             </section>
 
+
             {/* Refer & Earn */}
-            <section className="space-y-5">
+            {/* <section className="space-y-5">
                 <div className="flex items-center gap-3">
                     <span className="h-5 w-[2px] bg-violetBrand rounded-full" />
                     <h2 className="text-lg font-medium text-textMain">
@@ -118,7 +120,7 @@ export default function ReferEarn() {
                         </div>
                     </div>
                 </div>
-            </section>
+            </section> */}
         </div>
     );
 }

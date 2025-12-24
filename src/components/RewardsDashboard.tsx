@@ -1,11 +1,135 @@
 import { Calendar } from 'lucide-react';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { supabase } from '../services/supabase';
+import LevelUpModal from "../components//LevelUpModal";
+
 
 export default function RewardsDashboard() {
     const [activeTab, setActiveTab] = useState<'Earn' | 'Redeem'>('Earn');
     const [selectedDay, setSelectedDay] = useState<number | null>(null);
 
+    const [points, setPoints] = useState(0);
+    const [dailyStreak, setDailyStreak] = useState(0);
+    const [claimedToday, setClaimedToday] = useState(false);
+
     const weekDays = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+
+    /* ---------------- FETCH USER DATA ---------------- */
+    useEffect(() => {
+        const fetchData = async () => {
+            const { data: auth } = await supabase.auth.getUser();
+            if (!auth?.user) return;
+
+            const { data, error } = await supabase
+                .from('user_rewards')
+                .select('points, daily_streak, last_check_in')
+                .eq('user_id', auth.user.id)
+                .single();
+
+            if (error || !data) return;
+
+            setPoints(data.points);
+            setDailyStreak(data.daily_streak);
+
+            const today = new Date().toISOString().split('T')[0];
+            setClaimedToday(data.last_check_in === today);
+        };
+
+        fetchData();
+    }, []);
+
+    /* ---------------- DAY CLICK ---------------- */
+    const handleDayClick = (index: number) => {
+        setSelectedDay(index);
+    };
+
+    /* ---------------- DAILY CLAIM ---------------- */
+    // const handleDailyClaim = async () => {
+    //     if (claimedToday) return;
+
+    //     const { data: auth } = await supabase.auth.getUser();
+    //     if (!auth?.user) return;
+
+    //     const today = new Date().toISOString().split('T')[0];
+
+    //     const { error } = await supabase
+    //         .from('user_rewards')
+    //         .update({
+    //             points: points + 5,
+    //             daily_streak: dailyStreak + 1,
+    //             last_check_in: today,
+    //         })
+    //         .eq('user_id', auth.user.id)
+    //         .neq('last_check_in', today);
+
+    //     if (!error) {
+    //         setPoints((p) => p + 5);
+    //         setDailyStreak((s) => s + 1);
+    //         setClaimedToday(true);
+    //     }
+    // };
+    const handleDailyClaim = async () => {
+        if (claimedToday) return;
+
+        const { data: auth } = await supabase.auth.getUser();
+        if (!auth?.user) return;
+
+        const today = new Date().toISOString().split("T")[0];
+
+        const { error } = await supabase
+            .from("user_rewards")
+            .update({
+                points: points + 5,
+                daily_streak: dailyStreak + 1,
+                last_check_in: today,
+            })
+            .eq("user_id", auth.user.id)
+            .neq("last_check_in", today);
+
+        if (!error) {
+            setPoints((p) => p + 5);
+            setDailyStreak((s) => s + 1);
+
+            // Show modal — but don't disable yet
+            setShowModal(true);
+        }
+    };
+
+    const [showModal, setShowModal] = useState(false);
+
+    const handleCloseModal = () => {
+        setShowModal(false);
+        setClaimedToday(true);
+    };
+
+    /* ---------------- FEATURED SIGN UP ---------------- */
+    const handleFeaturedSignup = async () => {
+        const { data: auth } = await supabase.auth.getUser();
+        if (!auth?.user) return;
+
+        await supabase.from('reward_events').insert({
+            user_id: auth.user.id,
+            type: 'featured_signup',
+            points: 0,
+        });
+    };
+
+    /* ---------------- FEATURED CLAIM ---------------- */
+    const handleFeaturedClaim = async () => {
+        const { data: auth } = await supabase.auth.getUser();
+        if (!auth?.user) return;
+
+        const { error } = await supabase
+            .from('user_rewards')
+            .update({ points: points + 50 })
+            .eq('user_id', auth.user.id);
+
+        if (!error) {
+            setPoints((p) => p + 50);
+        }
+    };
+
+    /* ================= UI (UNCHANGED) ================= */
 
     return (
         <div className="w-full px-0 py-[24px]">
@@ -34,7 +158,8 @@ export default function RewardsDashboard() {
             </div>
 
             {/* Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-12 gap-[20px]">
+            <div className="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-12 gap-[10px]">
+
                 {/* Points Balance */}
                 <div className="xl:col-span-4 rounded-[20px] bg-white-900 shadow-[0px_8px_24px_rgba(0,0,0,0.04)] overflow-hidden">
                     <div className="bg-[#EEF2FF] px-[24px] py-[16px]">
@@ -46,7 +171,9 @@ export default function RewardsDashboard() {
 
                     <div className="p-[24px]">
                         <div className="flex items-center justify-between mb-[20px]">
-                            <div className="text-[36px] font-bold text-[#7C3AED]">0</div>
+                            <div className="text-[36px] font-bold text-[#7C3AED]">
+                                {points}
+                            </div>
                             <div className="h-[40px] w-[40px] rounded-full bg-[#FEF3C7] flex items-center justify-center">
                                 <span className="text-[18px]">🪙</span>
                             </div>
@@ -55,92 +182,130 @@ export default function RewardsDashboard() {
                         <div className="mb-[16px]">
                             <div className="flex justify-between text-[12px] text-[#6B7280] mb-[6px]">
                                 <span>Progress to $5 Gift Card</span>
-                                <span>0/5000</span>
+                                <span>{points}/5000</span>
                             </div>
                             <div className="h-[6px] w-full rounded-full bg-[#E5E7EB]">
-                                <div className="h-[6px] rounded-full bg-[#7C3AED] w-[0%]" />
+                                <div
+                                    className="h-[6px] rounded-full bg-[#7C3AED]"
+                                    style={{ width: `${Math.min((points / 5000) * 100, 100)}%` }}
+                                />
                             </div>
                         </div>
 
                         <div className="text-[12px] text-[#6B7280] flex items-center gap-[6px]">
-                            🚀 Just getting started — keep earning points!
+                            🚀 Keep earning points to unlock rewards!
                         </div>
                     </div>
                 </div>
 
                 {/* Daily Streak */}
-                <div className="xl:col-span-4 rounded-[20px] bg-white-900 shadow-[0px_8px_24px_rgba(0,0,0,0.04)] p-[24px]">
-                    <div className="flex items-center gap-[8px] text-[14px] font-semibold text-[#111827] mb-[16px]">
-                        <span className="text-[#7C3AED]">📅</span>
-                        Daily Streak
+                <div className="xl:col-span-4 min-w-[310px] mr-[20px] rounded-[20px] bg-white-900 shadow-[0px_8px_24px_rgba(0,0,0,0.04)] p-[25px]">
+                    <div className="bg-[#EEF2FF] px-[24px] py-[16px]">
+                        <div className="flex items-center gap-[8px] text-[14px] font-semibold text-[#111827] mb-[16px]">
+                            <span className="text-[#7C3AED]">📅</span>
+                            Daily Streak
+                        </div>
                     </div>
 
                     <div className="text-left text-[35px] font-bold text-[#7C3AED] mb-[16px]">
-                        0 day
+                        {dailyStreak} day
                     </div>
 
-                    {/* Daily Streak Buttons */}
-                    <div className="flex gap-1 mb-4 rounded-full overflow-hidden">
-                        {weekDays.map((d, i) => (
-                            <button
-                                key={i}
-                                onClick={() => setSelectedDay(i)}
-                                className={`
-        flex-1 h-10 sm:h-12 md:h-14 
-        flex items-center justify-center text-[13px] sm:text-sm md:text-base 
-        font-medium transition-colors
-        ${i === 0 ? 'rounded-l-full' : ''}
-        ${i === weekDays.length - 1 ? 'rounded-r-full' : ''}
-        ${selectedDay === i
-                                        ? 'border-2 border-[#7C3AED] text-[#7C3AED]'
-                                        : 'bg-[#E5E7EB] text-[#6B7280]'
-                                    }
-      `}
-                            >
-                                {d}
-                            </button>
-                        ))}
+                    <div className="w-full mb-4">
+                        <div className="flex justify-between">
+                            {weekDays.map((d, i) => (
+                                <button
+                                    key={i}
+                                    onClick={() => handleDayClick(i)}
+                                    className={`
+                                        size-8 sm:size-9 md:size-10
+                                        flex items-center justify-center
+                                        rounded-full
+                                        aspect-square
+                                        shrink-0
+                                        font-medium
+                                        text-sm 
+                                        transition-all
+                                        ${selectedDay === i
+                                            ? 'border-2 border-[#7C3AED] text-[#7C3AED] bg-white'
+                                            : 'bg-[#E5E7EB] text-[#6B7280]'
+                                        }
+                                    `}
+                                >
+                                    {d}
+                                </button>
+                            ))}
+                        </div>
                     </div>
-
 
                     <div className="text-[12px] text-[#6B7280] mb-[20px]">
                         Check in daily to earn +5 points
                     </div>
 
-                    <button className="w-full h-[44px] rounded-full bg-[#7C3AED] text-white text-[14px] font-semibold flex items-center justify-center gap-[6px]">
+                    <button
+                        onClick={handleDailyClaim}
+                        disabled={claimedToday}
+                        className="w-full h-[44px] rounded-full bg-[#7C3AED] text-white text-[14px] font-semibold flex items-center justify-center gap-[6px]"
+                    >
                         ⚡ Claim Today's Points
                     </button>
                 </div>
 
                 {/* Featured */}
-                <div className="xl:col-span-4 rounded-[20px] overflow-hidden shadow-[0px_8px_24px_rgba(0,0,0,0.04)]">
-                    <div className="bg-gradient-to-br from-[#7C3AED] to-[#60A5FA] p-[24px] text-white flex flex-col gap-4">
-                        <div className="inline-flex items-center px-[12px] py-[4px] rounded-full bg-white/20 text-[12px]">
+                <div className="xl:col-span-4 rounded-[20px] overflow-hidden bg-white shadow-[0px_8px_24px_rgba(0,0,0,0.04)]">
+                    <div className="bg-gradient-to-br from-[#8B5CF6] to-[#7DD3FC] p-[24px] text-white relative flex flex-col items-start">
+                        <div className="inline-flex items-center px-[10px] py-[4px] rounded-full bg-white/20 text-[12px] font-medium mb-4">
                             Featured
                         </div>
 
-                        <div className="flex items-center gap-2 text-[16px] font-semibold">
-                            <Calendar size={18} />
-                            Automate and Optimize Your Schedule
-                        </div>
+                        <h1 className="text-[18px] font-bold leading-tight mb-2 text-left">
+                            Top Tool Spotlight
+                        </h1>
 
-                        <div className="bg-white p-4 rounded-lg text-[#111827] text-[13px] leading-[1.6]">
-                            Reclaim.ai is an AI-powered calendar assistant that automatically
-                            schedules your tasks, meetings, and breaks. Free to try — earn
-                            Flowva Points when you sign up!
+                        <p className="text-[16px] font-semibold text-left">
+                            Reclaim
+                        </p>
+
+                        <div className="absolute top-[20px] right-[20px] h-[56px] w-[56px] rounded-full bg-[#6366F1] flex items-center justify-center overflow-hidden">
+                            <img src="/reclaim.png" alt="Reclaim icon" className="h-full w-full object-cover" />
                         </div>
                     </div>
 
-                    <div className="bg-white p-[24px] flex gap-[12px]">
-                        <button className="flex-1 h-[40px] rounded-full bg-[#7C3AED] text-white text-[14px] font-semibold">
+                    <div className="p-[24px] flex flex-col gap-3">
+                        <div className="flex items-center gap-2 text-[15px] font-semibold text-[#111827] text-left">
+                            <Calendar size={18} className="text-purple-600" />
+                            Automate and Optimize Your Schedule
+                        </div>
+
+                        <p className="text-[13px] text-[#4B5563] leading-[1.6] text-left">
+                            Reclaim.ai helps you automatically schedule tasks and meetings.
+                        </p>
+                    </div>
+
+                    <div className="px-[24px] pb-[24px] flex gap-[12px]">
+                        <button
+                            onClick={handleFeaturedSignup}
+                            className="flex-1 h-[40px] rounded-full bg-[#7C3AED] text-white text-[14px] font-semibold flex items-center justify-center gap-1"
+                        >
                             ➕ Sign up
                         </button>
-                        <button className="flex-1 h-[40px] rounded-full bg-[#F472B6] text-white text-[14px] font-semibold">
+                        <button
+                            onClick={handleFeaturedClaim}
+                            className="flex-1 h-[40px] rounded-full bg-[#EC4899] text-white text-[14px] font-semibold flex items-center justify-center gap-1"
+                        >
                             🎁 Claim 50 pts
                         </button>
                     </div>
                 </div>
+
             </div>
+            {showModal && (
+                <div className="fixed inset-0 z-[999] bg-black/40 backdrop-blur-sm flex items-center justify-center">
+                    <LevelUpModal open={showModal} onClose={handleCloseModal} />
+                </div>
+            )}
+
         </div>
+
     );
 }
