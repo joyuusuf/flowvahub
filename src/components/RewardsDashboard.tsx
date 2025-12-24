@@ -2,6 +2,7 @@ import { Calendar } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../services/supabase';
 import LevelUpModal from "../components//LevelUpModal";
+import ClaimReclaimModal from "../components/ClaimReclaimModal";
 
 
 export default function RewardsDashboard() {
@@ -11,6 +12,7 @@ export default function RewardsDashboard() {
     const [points, setPoints] = useState(0);
     const [dailyStreak, setDailyStreak] = useState(0);
     const [claimedToday, setClaimedToday] = useState(false);
+    const [showClaimModal, setShowClaimModal] = useState(false);
 
     const weekDays = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
 
@@ -115,18 +117,21 @@ export default function RewardsDashboard() {
     };
 
     /* ---------------- FEATURED CLAIM ---------------- */
+    // const handleFeaturedClaim = async () => {
+    //     const { data: auth } = await supabase.auth.getUser();
+    //     if (!auth?.user) return;
+
+    //     const { error } = await supabase
+    //         .from('user_rewards')
+    //         .update({ points: points + 50 })
+    //         .eq('user_id', auth.user.id);
+
+    //     if (!error) {
+    //         setPoints((p) => p + 50);
+    //     }
+    // };
     const handleFeaturedClaim = async () => {
-        const { data: auth } = await supabase.auth.getUser();
-        if (!auth?.user) return;
-
-        const { error } = await supabase
-            .from('user_rewards')
-            .update({ points: points + 50 })
-            .eq('user_id', auth.user.id);
-
-        if (!error) {
-            setPoints((p) => p + 50);
-        }
+        setShowClaimModal(true);
     };
 
     /* ================= UI (UNCHANGED) ================= */
@@ -278,7 +283,9 @@ export default function RewardsDashboard() {
                         </div>
 
                         <p className="text-[13px] text-[#4B5563] leading-[1.6] text-left">
-                            Reclaim.ai helps you automatically schedule tasks and meetings.
+                            Reclaim.ai is an AI-powered calendar assistant that automatically schedules 
+                            your tasks, meetings, and breaks to boost productivity. Free to try — earn 
+                            Flowva Points when you sign up!
                         </p>
                     </div>
 
@@ -302,6 +309,19 @@ export default function RewardsDashboard() {
             {showModal && (
                 <div className="fixed inset-0 z-[999] bg-black/40 backdrop-blur-sm flex items-center justify-center">
                     <LevelUpModal open={showModal} onClose={handleCloseModal} />
+                </div>
+            )}
+
+
+            {showClaimModal && (
+                <div className="fixed inset-0 z-[999] bg-black/40 backdrop-blur-sm flex items-center justify-center">
+                    <ClaimReclaimModal
+                        open={showClaimModal}
+                        onClose={() => setShowClaimModal(false)}
+                        onSubmit={() => {
+                            setShowClaimModal(false);
+                        }}
+                    />
                 </div>
             )}
 
