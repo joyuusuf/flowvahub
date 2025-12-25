@@ -4,8 +4,7 @@ import { useRewards } from "../hooks/useRewards";
 import Loader from "../components/Loader";
 import AppLayout from "../components/AppLayout";
 import RewardsDashboard from "../components/RewardsDashboard";
-import ReferAndEarnPage from "../components/Referearn";
-import ReferCard from "../components/ReferCard";
+
 
 export default function Rewards() {
   const [user, setUser] = useState(null);
