@@ -116,7 +116,7 @@ export default function RewardsDashboard(
             alert("Failed to sign out: " + error.message);
             return;
         }
-        window.location.href = '/sign-out'; 
+        window.location.href = '/sign-out';
     };
 
     return (
@@ -179,7 +179,7 @@ export default function RewardsDashboard(
                                                 <span className="text-[18px]">🪙</span>
                                             </div>
 
-                                          
+
                                         </div>
                                     </div>
                                 </div>
@@ -323,9 +323,11 @@ export default function RewardsDashboard(
                     <ClaimReclaimModal
                         open={showClaimModal}
                         onClose={() => setShowClaimModal(false)}
+                        onClaimSuccess={(addedPoints: number) => setPoints(p => p + addedPoints)}
                     />
                 </div>
             )}
+
         </div>
     );
 }

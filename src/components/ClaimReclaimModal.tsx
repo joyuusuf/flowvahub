@@ -5,18 +5,19 @@ import { supabase } from "../services/supabase";
 interface ClaimReclaimModalProps {
   open: boolean;
   onClose: () => void;
+  onClaimSuccess?: (addedPoints: number) => void; // ✅ Callback to update parent points
 }
 
 const ClaimReclaimModal: React.FC<ClaimReclaimModalProps> = ({
   open,
   onClose,
+  onClaimSuccess,
 }) => {
   const [email, setEmail] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
- 
   useEffect(() => {
     if (!open) {
       setEmail("");
@@ -50,7 +51,6 @@ const ClaimReclaimModal: React.FC<ClaimReclaimModalProps> = ({
 
     try {
       // 1️⃣ Get authenticated user
-         console.log("STEP 1: getUser");
       const { data: authData, error: authError } = await supabase.auth.getUser();
       if (authError || !authData?.user) {
         throw new Error("User not authenticated");
@@ -58,7 +58,6 @@ const ClaimReclaimModal: React.FC<ClaimReclaimModalProps> = ({
       const userId = authData.user.id;
 
       // 2️⃣ Prevent duplicate claim
-       console.log("STEP 2: check claim");
       const { data: existingClaim } = await supabase
         .from("reclaim_claims")
         .select("id")
@@ -69,22 +68,19 @@ const ClaimReclaimModal: React.FC<ClaimReclaimModalProps> = ({
         throw new Error("You have already claimed these points");
       }
 
-      // 3️⃣ Normalize file name and upload screenshot to storage
-       console.log("STEP 3: upload");
+      // 3️⃣ Normalize file name and upload screenshot
       const safeFileName = file.name.replace(/\s+/g, "-");
       const filePath = `reclaim-screenshots/${userId}/${Date.now()}-${safeFileName}`;
 
       const { error: uploadError } = await supabase.storage
-        .from("Images") // your bucket name
+        .from("Images")
         .upload(filePath, file);
 
       if (uploadError) {
-        console.error(uploadError);
         throw new Error("Failed to upload screenshot");
       }
 
       // 4️⃣ Get public URL
-      console.log("STEP 4: public url");
       const { data: urlData } = supabase.storage
         .from("Images")
         .getPublicUrl(filePath);
@@ -94,7 +90,6 @@ const ClaimReclaimModal: React.FC<ClaimReclaimModalProps> = ({
       }
 
       // 5️⃣ Insert reclaim claim into database
-      console.log("STEP 5: insert claim");
       const { error: insertError } = await supabase
         .from("reclaim_claims")
         .insert({
@@ -108,7 +103,6 @@ const ClaimReclaimModal: React.FC<ClaimReclaimModalProps> = ({
       }
 
       // 6️⃣ Add 25 points safely
-          console.log("STEP 6: update points");
       const { data: rewardData, error: rewardFetchError } = await supabase
         .from("user_rewards")
         .select("points")
@@ -129,6 +123,9 @@ const ClaimReclaimModal: React.FC<ClaimReclaimModalProps> = ({
       if (rewardUpdateError) {
         throw new Error("Failed to add points");
       }
+
+      // ✅ Update parent points state
+      onClaimSuccess?.(25);
 
       alert("25 points successfully added 🎉");
       onClose();
