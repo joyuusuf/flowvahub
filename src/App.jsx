@@ -4,9 +4,14 @@ import Login from "./pages/Login";
 import Rewards from "./pages/Rewards";
 import "./App.css";
 
-
 export default function App() {
   const [session, setSession] = useState(undefined);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setLoading(false), 4000);
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     let mounted = true;
@@ -27,10 +32,26 @@ export default function App() {
     };
   }, []);
 
-  if (session === undefined) {
+  if (loading || session === undefined) {
     return (
-      <div className="flex justify-center items-center h-screen">
-        <p className="text-purple-600 font-semibold">Initializing app...</p>
+      <div className="fixed inset-0 flex justify-center items-center bg-white">
+        <img
+          src="/flowva_logo.png"
+          alt="Logo"
+          className="w-40 h-32"
+          style={{
+            animationName: 'fade',
+            animationDuration: '1.5s',
+            animationTimingFunction: 'ease-in-out',
+            animationIterationCount: 'infinite',
+          }}
+        />
+        <style jsx>{`
+          @keyframes fade {
+            0%, 100% { opacity: 0; }
+            50% { opacity: 1; }
+          }
+        `}</style>
       </div>
     );
   }

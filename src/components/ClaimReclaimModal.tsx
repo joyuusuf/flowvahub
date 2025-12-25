@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { UploadCloud } from "lucide-react";
 import { supabase } from "../services/supabase";
 
@@ -13,9 +13,32 @@ const ClaimReclaimModal: React.FC<ClaimReclaimModalProps> = ({
 }) => {
   const [email, setEmail] = useState("");
   const [file, setFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
+ 
+  useEffect(() => {
+    if (!open) {
+      setEmail("");
+      setFile(null);
+      setPreviewUrl(null);
+      setLoading(false);
+    }
+  }, [open]);
+
   if (!open) return null;
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = e.target.files ? e.target.files[0] : null;
+    setFile(selectedFile);
+
+    if (selectedFile) {
+      const objectUrl = URL.createObjectURL(selectedFile);
+      setPreviewUrl(objectUrl);
+    } else {
+      setPreviewUrl(null);
+    }
+  };
 
   const handleSubmit = async () => {
     if (!email || !file) {
@@ -27,16 +50,15 @@ const ClaimReclaimModal: React.FC<ClaimReclaimModalProps> = ({
 
     try {
       // 1️⃣ Get authenticated user
-      const { data: authData, error: authError } =
-        await supabase.auth.getUser();
-
+         console.log("STEP 1: getUser");
+      const { data: authData, error: authError } = await supabase.auth.getUser();
       if (authError || !authData?.user) {
         throw new Error("User not authenticated");
       }
-
       const userId = authData.user.id;
 
       // 2️⃣ Prevent duplicate claim
+       console.log("STEP 2: check claim");
       const { data: existingClaim } = await supabase
         .from("reclaim_claims")
         .select("id")
@@ -47,22 +69,32 @@ const ClaimReclaimModal: React.FC<ClaimReclaimModalProps> = ({
         throw new Error("You have already claimed these points");
       }
 
-      // 3️⃣ Upload screenshot to storage
-      const filePath = `${userId}/${Date.now()}-${file.name}`;
+      // 3️⃣ Normalize file name and upload screenshot to storage
+       console.log("STEP 3: upload");
+      const safeFileName = file.name.replace(/\s+/g, "-");
+      const filePath = `reclaim-screenshots/${userId}/${Date.now()}-${safeFileName}`;
 
       const { error: uploadError } = await supabase.storage
-        .from("reclaim-screenshots")
+        .from("Images") // your bucket name
         .upload(filePath, file);
 
       if (uploadError) {
+        console.error(uploadError);
         throw new Error("Failed to upload screenshot");
       }
 
+      // 4️⃣ Get public URL
+      console.log("STEP 4: public url");
       const { data: urlData } = supabase.storage
-        .from("reclaim-screenshots")
+        .from("Images")
         .getPublicUrl(filePath);
 
-      // 4️⃣ Insert reclaim claim
+      if (!urlData.publicUrl) {
+        throw new Error("Failed to get file URL");
+      }
+
+      // 5️⃣ Insert reclaim claim into database
+      console.log("STEP 5: insert claim");
       const { error: insertError } = await supabase
         .from("reclaim_claims")
         .insert({
@@ -75,29 +107,26 @@ const ClaimReclaimModal: React.FC<ClaimReclaimModalProps> = ({
         throw new Error("Failed to submit claim");
       }
 
-      // 5️⃣ Add 25 points
-      // First fetch current points
-      const { data: currentReward, error: fetchError } = await supabase
+      // 6️⃣ Add 25 points safely
+          console.log("STEP 6: update points");
+      const { data: rewardData, error: rewardFetchError } = await supabase
         .from("user_rewards")
         .select("points")
         .eq("user_id", userId)
-        .maybeSingle();
+        .single();
 
-      if (fetchError) {
-        throw new Error("Failed to fetch current points");
+      if (rewardFetchError || !rewardData) {
+        throw new Error("Failed to fetch user points");
       }
 
-      const newPoints = (currentReward?.points || 0) + 25;
-
-      const { data: rewardData, error: rewardError } = await supabase
+      const { error: rewardUpdateError } = await supabase
         .from("user_rewards")
         .update({
-          points: newPoints,
+          points: rewardData.points + 25,
         })
-        .eq("user_id", userId)
-        .select();
+        .eq("user_id", userId);
 
-      if (rewardError || !rewardData || rewardData.length === 0) {
+      if (rewardUpdateError) {
         throw new Error("Failed to add points");
       }
 
@@ -143,7 +172,6 @@ const ClaimReclaimModal: React.FC<ClaimReclaimModalProps> = ({
         <label className="text-sm text-left font-medium text-gray-800 mb-1 block">
           Email used on Reclaim
         </label>
-
         <input
           type="email"
           value={email}
@@ -156,7 +184,6 @@ const ClaimReclaimModal: React.FC<ClaimReclaimModalProps> = ({
         <label className="text-sm font-medium text-left text-gray-800 mb-1 block">
           Upload screenshot (mandatory)
         </label>
-
         <label className="w-full h-[70px] border border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center cursor-pointer text-sm text-gray-600 mb-6">
           <span className="text-xl mb-1">
             <UploadCloud />
@@ -166,11 +193,20 @@ const ClaimReclaimModal: React.FC<ClaimReclaimModalProps> = ({
             type="file"
             accept="image/*"
             className="hidden"
-            onChange={(e) =>
-              setFile(e.target.files ? e.target.files[0] : null)
-            }
+            onChange={handleFileChange}
           />
         </label>
+
+        {/* Live preview */}
+        {previewUrl && (
+          <div className="mb-4">
+            <img
+              src={previewUrl}
+              alt="Uploaded Screenshot Preview"
+              className="w-full rounded-md"
+            />
+          </div>
+        )}
 
         {/* Buttons */}
         <div className="flex justify-end gap-3">
@@ -180,7 +216,6 @@ const ClaimReclaimModal: React.FC<ClaimReclaimModalProps> = ({
           >
             Cancel
           </button>
-
           <button
             onClick={handleSubmit}
             disabled={loading}

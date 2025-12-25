@@ -84,43 +84,7 @@ export default function ReferEarn() {
             </section>
 
 
-            {/* Refer & Earn */}
-            {/* <section className="space-y-5">
-                <div className="flex items-center gap-3">
-                    <span className="h-5 w-[2px] bg-violetBrand rounded-full" />
-                    <h2 className="text-lg font-medium text-textMain">
-                        Refer & Earn
-                    </h2>
-                </div>
-
-                <div className="bg-softBg border border-borderSoft rounded-xl p-6 space-y-8">
-
-                    <div className="flex items-start gap-4">
-                        <div className="h-9 w-9 rounded-lg bg-violetIcon flex items-center justify-center">
-                            <Users className="h-4 w-4 text-violetBrand" />
-                        </div>
-                        <div>
-                            <p className="font-medium text-textMain text-sm">
-                                Share Your Link
-                            </p>
-                            <p className="text-sm text-textMuted">
-                                Invite friends and earn 25 points when they join!
-                            </p>
-                        </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 text-center">
-                        <div>
-                            <p className="text-xl font-medium text-violetBrand">0</p>
-                            <p className="text-sm text-textMuted">Referrals</p>
-                        </div>
-                        <div>
-                            <p className="text-xl font-medium text-violetBrand">0</p>
-                            <p className="text-sm text-textMuted">Points Earned</p>
-                        </div>
-                    </div>
-                </div>
-            </section> */}
+            
         </div>
     );
 }
