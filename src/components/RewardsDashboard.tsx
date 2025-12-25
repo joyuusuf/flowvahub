@@ -356,6 +356,7 @@ import React, { useEffect, useState } from 'react';
 import { supabase } from '../services/supabase';
 import LevelUpModal from "../components//LevelUpModal";
 import ClaimReclaimModal from "../components/ClaimReclaimModal";
+import RedeemRewards from "../components/RedeemRewards";
 
 export default function RewardsDashboard() {
     const [activeTab, setActiveTab] = useState<'Earn' | 'Redeem'>('Earn');
@@ -455,19 +456,26 @@ export default function RewardsDashboard() {
         setShowClaimModal(true);
     };
 
+    /* ---------- 🔁 SWITCH TO REDEEM PAGE ---------- */
+    if (activeTab === 'Redeem') {
+        return (
+            <RedeemRewards />
+        );
+    }
     /* ================= UI (UNCHANGED) ================= */
     return (
         <div className="w-full px-0 py-[24px]">
-            {/* Tabs */}
+             {/* Tabs */}
             <div className="flex gap-[24px] text-[14px] font-medium mb-[24px] px-[10px] sm:px-0">
                 {['Earn', 'Redeem'].map((tab) => (
                     <button
                         key={tab}
                         onClick={() => setActiveTab(tab as 'Earn' | 'Redeem')}
-                        className={`px-[14px] py-[6px] rounded-[8px] relative transition-colors ${activeTab === tab
-                            ? 'text-[#7C3AED] after:absolute after:-bottom-[2px] after:left-0 after:w-full after:h-[2px] after:bg-[#7C3AED]'
-                            : 'text-[#6B7280]'
-                            }`}
+                        className={`px-[14px] py-[6px] rounded-[8px] relative transition-colors ${
+                            activeTab === tab
+                                ? 'text-[#7C3AED] after:absolute after:-bottom-[2px] after:left-0 after:w-full after:h-[2px] after:bg-[#7C3AED]'
+                                : 'text-[#6B7280]'
+                        }`}
                     >
                         {tab === 'Earn' ? 'Earn Points' : 'Redeem Rewards'}
                     </button>
