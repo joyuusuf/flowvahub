@@ -4,7 +4,7 @@ import { supabase } from '../services/supabase';
 import LevelUpModal from "../components/LevelUpModal";
 import ClaimReclaimModal from "../components/ClaimReclaimModal";
 import RedeemRewards from "../components/RedeemRewards";
-import ReferEarn from './Referearn';
+import ReferEarn from './ReferEarn';
 import ReferCard from './ReferCard';
 
 export default function RewardsDashboard(
