@@ -1,7 +1,7 @@
 import { Calendar } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../services/supabase';
-import LevelUpModal from "../components//LevelUpModal";
+import LevelUpModal from "../components/LevelUpModal";
 import ClaimReclaimModal from "../components/ClaimReclaimModal";
 import RedeemRewards from "../components/RedeemRewards";
 import ReferEarn from './Referearn';
