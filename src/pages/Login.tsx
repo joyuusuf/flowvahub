@@ -1,5 +1,3 @@
-
-
 import { useState } from "react";
 import { supabase } from "../services/supabase";
 
@@ -16,35 +14,48 @@ export default function LoginPage() {
 
     try {
       if (isSignUp) {
-        const { error } = await supabase.auth.signUp({ email, password });
+        // --- SIGN UP ---
+        const { error } = await supabase.auth.signUp({
+          email,
+          password,
+        });
+
         if (error) throw error;
-        alert("Check your email for confirmation!");
+
+        // IMPORTANT: don't navigate — wait for email verification
+        alert("Account created 🎉\nCheck your email to confirm your account.");
       } else {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        // --- SIGN IN ---
+        const { error } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+
         if (error) throw error;
+
+        // Do NOT navigate here — let your global auth listener redirect
       }
-    } catch (error: any) {
-      alert(error.message);
+    } catch (err: any) {
+      alert(err?.message || "Something went wrong");
     } finally {
       setLoading(false);
     }
   };
 
-  // Handle Google OAuth
+  // GOOGLE AUTH
   const handleGoogleSignIn = async () => {
     setLoading(true);
+
     try {
-      const { error } = await supabase.auth.signInWithOAuth({
+      await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          // Redirect user back to your site after OAuth login
-          redirectTo: window.location.origin,
+          // Redirect back to login — avoids auto sending user elsewhere
+          redirectTo: `${window.location.origin}/auth/callback`,
         },
       });
-      if (error) throw error;
-      // No need for additional logic—Supabase handles sign-up/login automatically
-    } catch (error: any) {
-      alert(error.message);
+    } catch (err: any) {
+      alert(err?.message || "Google login failed");
     } finally {
       setLoading(false);
     }
@@ -53,28 +64,32 @@ export default function LoginPage() {
   return (
     <div className="fixed inset-0 bg-gradient-to-br from-[#8B2CF5] to-[#7C1EE6] flex items-center justify-center">
       <div className="w-full max-w-[420px] bg-white rounded-2xl shadow-xl px-8 py-10">
+
         {/* Header */}
         <h1 className="text-center text-[24px] font-bold text-[#7C1EE6]">
           {isSignUp ? "Create your flowwa account" : "Log in to flowwa"}
         </h1>
+
         <p className="text-center text-sm text-gray-500 mt-2">
           {isSignUp
             ? "Sign up to start earning rewards"
             : "Log in to receive personalized recommendations"}
         </p>
 
-        {/* Form */}
+        {/* FORM */}
         <form onSubmit={handleSubmit} className="mt-8 space-y-6">
+
           {/* Email */}
           <div>
             <label className="block text-left text-sm font-medium text-gray-900 mb-2">
               Email
             </label>
+
             <input
               type="email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
               required
+              onChange={(e) => setEmail(e.target.value)}
               className="w-full h-[48px] rounded-lg bg-[#EEF4FF] px-4 text-sm outline-none focus:ring-2 focus:ring-purple-500"
             />
           </div>
@@ -84,14 +99,16 @@ export default function LoginPage() {
             <label className="block text-left text-sm font-medium text-gray-900 mb-2">
               Password
             </label>
+
             <div className="relative">
               <input
                 type={showPassword ? "text" : "password"}
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
                 required
+                onChange={(e) => setPassword(e.target.value)}
                 className="w-full h-[48px] rounded-lg bg-[#EEF4FF] px-4 pr-14 text-sm outline-none focus:ring-2 focus:ring-purple-500"
               />
+
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
@@ -134,7 +151,7 @@ export default function LoginPage() {
           <div className="flex-1 h-px bg-gray-200" />
         </div>
 
-        {/* Google Sign-in */}
+        {/* Google */}
         <button
           onClick={handleGoogleSignIn}
           disabled={loading}

@@ -49,7 +49,7 @@ export default function Rewards() {
 
   return (
     <AppLayout>
-       <div className="w-full max-w-5xl mx-auto px-8 md:px-8 space-y-8">
+       <div className="w-full max-w-5xl px-10 md:px-10 space-y-10 py-14">
 
         <RewardsDashboard
           points={rewards.points}

@@ -19,7 +19,6 @@ export default function RewardsDashboard(
     }
 ) {
 
-
     const [activeTab, setActiveTab] = useState<'Earn' | 'Redeem'>('Earn');
     const [selectedDay, setSelectedDay] = useState<number | null>(null);
 
@@ -29,8 +28,16 @@ export default function RewardsDashboard(
     const [showClaimModal, setShowClaimModal] = useState(false);
 
     const weekDays = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
-
     const [coinFlipping, setCoinFlipping] = useState(true);
+
+    const [showModal, setShowModal] = useState(false);
+    const [claimedDayIndex, setClaimedDayIndex] = useState<number | null>(null);
+    new Date().getDay()
+    const getTodayIndex = () => {
+        const jsDay = new Date().getDay(); // 0–6 (Sun–Sat)
+        return (jsDay + 6) % 7;            // Shift so Monday becomes 0
+    };
+
 
     useEffect(() => {
         const timer = setTimeout(() => setCoinFlipping(false), 1500);
@@ -62,8 +69,30 @@ export default function RewardsDashboard(
 
     const handleDayClick = (index: number) => setSelectedDay(index);
 
-    const [showModal, setShowModal] = useState(false);
+    // const handleDailyClaim = async () => {
+    //     if (claimedToday) return;
 
+    //     const { data: auth } = await supabase.auth.getUser();
+    //     if (!auth?.user) return;
+
+    //     const today = new Date().toISOString().split("T")[0];
+
+    //     const { error } = await supabase
+    //         .from("user_rewards")
+    //         .update({
+    //             points: points + 5,
+    //             daily_streak: dailyStreak + 1,
+    //             last_check_in: today,
+    //         })
+    //         .eq("user_id", auth.user.id)
+    //         .neq("last_check_in", today);
+
+    //     if (!error) {
+    //         setPoints(p => p + 5);
+    //         setDailyStreak(s => s + 1);
+    //         setShowModal(true);
+    //     }
+    // };
     const handleDailyClaim = async () => {
         if (claimedToday) return;
 
@@ -86,6 +115,16 @@ export default function RewardsDashboard(
             setPoints(p => p + 5);
             setDailyStreak(s => s + 1);
             setShowModal(true);
+            setClaimedToday(true);
+
+
+            const todayIndex = getTodayIndex();
+            setClaimedDayIndex(todayIndex);
+            setSelectedDay(todayIndex);
+
+            setTimeout(() => {
+                setClaimedDayIndex(null);
+            }, 5 * 60 * 1000);
         }
     };
 
@@ -94,36 +133,20 @@ export default function RewardsDashboard(
         setClaimedToday(true);
     };
 
-    const handleFeaturedSignup = async () => {
-        const { data: auth } = await supabase.auth.getUser();
-        if (!auth?.user) return;
-
-        await supabase.from('reward_events').insert({
-            user_id: auth.user.id,
-            type: 'featured_signup',
-            points: 0,
-        });
-    };
-
     const handleFeaturedClaim = async () => {
         setShowClaimModal(true);
     };
 
-    // ✅ Supabase Sign Out Logic
-    const handleSignOut = async () => {
-        const { error } = await supabase.auth.signOut();
-        if (error) {
-            alert("Failed to sign out: " + error.message);
-            return;
-        }
-        window.location.href = '/sign-out';
+    // ✅ Updated Sign Up Button Logic
+    const handleSignup = () => {
+        window.location.href = "/signup"; // Navigate to your signup page
     };
 
     return (
-        <div className="w-full px-0 py-[24px]">
+        <div className="w-full px-6 py-[24px]">
 
             {/* Tabs */}
-            <div className="flex gap-[24px] text-[14px] font-medium mb-[24px] px-[10px] sm:px-0">
+            <div className="flex gap-[30px] text-[14px] font-medium mb-[24px] px-[10px] sm:px-0">
                 {['Earn', 'Redeem'].map((tab) => (
                     <button
                         key={tab}
@@ -141,8 +164,6 @@ export default function RewardsDashboard(
                 ))}
             </div>
 
-
-
             {/* ================== EARN TAB ================== */}
             {activeTab === 'Earn' && (
                 <>
@@ -153,7 +174,8 @@ export default function RewardsDashboard(
                             Your Rewards Journey
                         </h1>
                     </div>
-                    <div className="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-12 gap-[10px]">
+
+                    <div className="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-12 gap-[20px]">
 
                         {/* Points Balance */}
                         <div className="xl:col-span-4 rounded-[20px] bg-white-900 shadow-[0px_8px_24px_rgba(0,0,0,0.04)] overflow-hidden">
@@ -178,8 +200,6 @@ export default function RewardsDashboard(
                                             <div className="absolute inset-0 backface-hidden flex items-center justify-center rounded-full bg-[#FEF3C7]">
                                                 <span className="text-[18px]">🪙</span>
                                             </div>
-
-
                                         </div>
                                     </div>
                                 </div>
@@ -204,7 +224,7 @@ export default function RewardsDashboard(
                         </div>
 
                         {/* Daily Streak */}
-                        <div className="xl:col-span-4 min-w-[310px] mr-[20px] rounded-[20px] bg-white-900 shadow-[0px_8px_24px_rgba(0,0,0,0.04)] p-[25px]">
+                        <div className="xl:col-span-4 min-w-[300px] md:min-w-[310px] mr-[20px] rounded-[20px] bg-white-900 shadow-[0px_8px_24px_rgba(0,0,0,0.04)] p-[20px]">
                             <div className="bg-[#EEF2FF] px-[24px] py-[16px]">
                                 <div className="flex items-center gap-[8px] text-[14px] font-semibold text-[#111827] mb-[16px]">
                                     <span className="text-[#7C3AED]">📅</span>
@@ -222,14 +242,18 @@ export default function RewardsDashboard(
                                         <button
                                             key={i}
                                             onClick={() => handleDayClick(i)}
-                                            className={`size-8 sm:size-9 md:size-10 flex items-center justify-center rounded-full aspect-square shrink-0 font-medium text-sm transition-all ${selectedDay === i
-                                                ? 'border-2 border-[#7C3AED] text-[#7C3AED] bg-white'
-                                                : 'bg-[#E5E7EB] text-[#6B7280]'
+                                            className={`size-8 sm:size-9 md:size-10 flex items-center justify-center rounded-full aspect-square shrink-0 font-medium text-sm transition-all
+                                            ${claimedDayIndex === i
+                                                    ? 'bg-[#DBEAFE] text-[#2563EB] border border-[#2563EB]'
+                                                    : selectedDay === i
+                                                        ? 'border-2 border-[#7C3AED] text-[#7C3AED] bg-white'
+                                                        : 'bg-[#E5E7EB] text-[#6B7280]'
                                                 }`}
                                         >
                                             {d}
                                         </button>
                                     ))}
+
                                 </div>
                             </div>
 
@@ -247,7 +271,7 @@ export default function RewardsDashboard(
                         </div>
 
                         {/* Featured */}
-                        <div className="xl:col-span-4 rounded-[20px] overflow-hidden bg-white shadow-[0px_8px_24px_rgba(0,0,0,0.04)]">
+                        <div className="xl:col-span-4 rounded-[20px] overflow-hidden bg-white ml-[20px] shadow-[0px_8px_24px_rgba(0,0,0,0.04)] p-[24px]">
                             <div className="bg-gradient-to-br from-[#8B5CF6] to-[#7DD3FC] p-[24px] text-white relative flex flex-col items-start">
                                 <div className="inline-flex items-center px-[10px] py-[4px] rounded-full bg-white/20 text-[12px] font-medium mb-4">
                                     Featured
@@ -281,7 +305,7 @@ export default function RewardsDashboard(
 
                             <div className="px-[24px] pb-[24px] flex gap-[12px]">
                                 <button
-                                    onClick={handleFeaturedSignup}
+                                    onClick={handleSignup} // ✅ Updated navigation
                                     className="flex-1 h-[40px] rounded-full bg-[#7C3AED] text-white text-[14px] font-semibold flex items-center justify-center gap-1"
                                 >
                                     ➕ Sign up
@@ -296,11 +320,11 @@ export default function RewardsDashboard(
                         </div>
 
                     </div>
+
                     <ReferEarn />
                     <ReferCard />
                 </>
             )}
-
 
             {/* ================== REDEEM TAB ================== */}
             {activeTab === 'Redeem' && (
@@ -308,9 +332,6 @@ export default function RewardsDashboard(
                     <RedeemRewards />
                 </div>
             )}
-
-
-
 
             {showModal && (
                 <div className="fixed inset-0 z-[999] bg-black/40 backdrop-blur-sm flex items-center justify-center">
