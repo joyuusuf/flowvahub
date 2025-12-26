@@ -49,15 +49,15 @@ export default function Rewards() {
 
   return (
     <AppLayout>
-       <div className="w-full max-w-5xl px-10 md:px-10 space-y-10 py-14">
-
+      {/* <div className="w-full max-w-5xl px-10 md:px-10 space-y-10 py-14"> */}
+      <div className="w-full max-w-5xl px-10 md:px-10 space-y-10 py-14 flex-1 min-h-[80vh]">
         <RewardsDashboard
           points={rewards.points}
           streak={rewards.streak}
           onClaim={claimPoints}
         />
 
-        
+
       </div>
     </AppLayout>
   );

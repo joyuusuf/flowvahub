@@ -271,7 +271,7 @@ export default function RewardsDashboard(
                         </div>
 
                         {/* Featured */}
-                        <div className="xl:col-span-4 min-w-[300px] md:min-w-[310px] ml-[20px] rounded-[20px] bg-white-900 shadow-[0px_8px_24px_rgba(0,0,0,0.04)] p-[20px]">
+                        <div className="xl:col-span-5 min-w-[300px] md:min-w-[310px] ml-[20px] rounded-[20px] bg-white-900 shadow-[0px_8px_24px_rgba(0,0,0,0.04)] p-[20px]">
                         {/* <div className="xl:col-span-4 rounded-[20px] overflow-hidden bg-white ml-[20px] shadow-[0px_8px_24px_rgba(0,0,0,0.04)] px-[15px]"> */}
                             <div className="bg-gradient-to-br from-[#8B5CF6] to-[#7DD3FC] p-[24px] text-white relative flex flex-col items-start">
                                 <div className="inline-flex items-center px-[10px] py-[4px] rounded-full bg-white/20 text-[12px] font-medium mb-4">
@@ -329,7 +329,13 @@ export default function RewardsDashboard(
 
             {/* ================== REDEEM TAB ================== */}
             {activeTab === 'Redeem' && (
-                <div className="mt-4">
+               <div
+  className="w-full py-6 bg-white rounded-2xl"
+  style={{
+    minHeight: "620px",
+    maxHeight: "620px",
+  }}
+>
                     <RedeemRewards />
                 </div>
             )}

@@ -92,7 +92,14 @@ export default function RedeemRewards() {
   });
 
   return (
-    <div className="w-full py-6">
+    <div
+    className="w-full py-6 bg-white rounded-2xl"
+    style={{
+      minHeight: "520px",
+      maxHeight: "520px",
+      overflowY: "hidden"
+    }}
+  >
       {/* Tabs */}
       <div className="flex gap-6 text-sm font-medium mb-6">
         {[
