@@ -7,7 +7,45 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
   const [loading, setLoading] = useState(false);
+    function generateReferralCode(length = 8) {
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  let code = "";
+  for (let i = 0; i < length; i++) {
+    code += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return code;
+}
 
+const handleSignup = async (email: string, password: string) => {
+  // 1. Sign up the user with Supabase auth
+  const { data: user, error } = await supabase.auth.signUp({
+    email,
+    password,
+  });
+
+  if (error) {
+    console.error("Signup error:", error.message);
+    return;
+  }
+
+  if (user) {
+    // 2. Generate a unique referral code for this user
+    const referralCode = generateReferralCode();
+
+    // 3. Insert the user into the profiles table with referral code
+    const { error: profileError } = await supabase.from("profiles").insert({
+      id: user.id,
+      email,
+      referral_code: referralCode,
+    });
+
+    if (profileError) {
+      console.error("Error creating profile:", profileError.message);
+    } else {
+      console.log("Profile created with referral code:", referralCode);
+    }
+  }
+};
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);

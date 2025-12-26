@@ -1,16 +1,62 @@
-# React + Vite
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Flowva Rewards App 
 
-Currently, two official plugins are available:
+Flowva is a modern reward management web app that lets users **earn points**, **track daily streaks**, **refer friends**, and **redeem rewards**, all in one sleek dashboard.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+---
 
-## React Compiler
+## 🚀 Features
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **Daily Streaks:**  
+  Users can check in daily to earn points and maintain streaks. Days automatically highlight when points are claimed.
 
-## Expanding the ESLint configuration
+- **Points Balance & Progress:**  
+  Track points earned and progress toward rewards, such as gift cards.
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+- **Refer & Earn:**  
+  Each user has a **unique referral link**. Share it to earn 25 points per signup. Social sharing included (Facebook, LinkedIn, X, WhatsApp).
+
+- **Redeem Rewards:**  
+  Points can be exchanged for rewards via a dedicated redeem tab.
+
+- **Secure Authentication:**  
+  Powered by Supabase for sign-up, login, and user management.
+
+- **Responsive & Modern UI:**  
+  Built with React and TailwindCSS, optimized for both desktop and mobile.
+
+---
+
+## 📦 Tech Stack
+
+- **Frontend:** React, TailwindCSS, Lucide Icons, React Icons  
+- **Backend/Auth:** Supabase (PostgreSQL + Auth)  
+- **State Management:** React hooks  
+- **Hosting:** Vite for development
+
+---
+
+## 🎯 How It Works
+
+1. **Sign Up / Sign In:** User registers via email/password. A unique referral code is generated automatically.  
+2. **Earn Points:** Users claim daily points; streaks and progress bars update in real time.  
+3. **Share Referral:** Copy your personal referral link or share via social platforms.  
+4. **Redeem Rewards:** Access redeem tab to trade points for rewards.  
+5. **Track Rewards Journey:** Dashboard visualizes points, streaks, and referrals.
+
+---
+
+## ⚡ Getting Started
+
+1. Clone the repository:  
+```bash
+git clone <repo-url>
+
+
+Install dependencies:
+
+npm install
+
+Run locally:
+
+npm run dev
