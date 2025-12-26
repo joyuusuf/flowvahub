@@ -1,13 +1,7 @@
 import { useState } from "react";
 import { supabase } from "../services/supabase";
 
-export default function LoginPage() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [isSignUp, setIsSignUp] = useState(false);
-  const [loading, setLoading] = useState(false);
-    function generateReferralCode(length = 8) {
+function generateReferralCode(length = 8) {
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
   let code = "";
   for (let i = 0; i < length; i++) {
@@ -16,36 +10,44 @@ export default function LoginPage() {
   return code;
 }
 
-const handleSignup = async (email: string, password: string) => {
-  // 1. Sign up the user with Supabase auth
-  const { data: user, error } = await supabase.auth.signUp({
-    email,
-    password,
-  });
+// Ensure user has a referral code
+async function ensureReferralCode(userId: string) {
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("referral_code")
+    .eq("id", userId)
+    .single();
 
   if (error) {
-    console.error("Signup error:", error.message);
-    return;
+    console.error("Error fetching profile:", error.message);
+    return null;
   }
 
-  if (user) {
-    // 2. Generate a unique referral code for this user
+  if (!data?.referral_code) {
     const referralCode = generateReferralCode();
+    const { error: updateError } = await supabase
+      .from("profiles")
+      .update({ referral_code: referralCode })
+      .eq("id", userId);
 
-    // 3. Insert the user into the profiles table with referral code
-    const { error: profileError } = await supabase.from("profiles").insert({
-      id: user.id,
-      email,
-      referral_code: referralCode,
-    });
-
-    if (profileError) {
-      console.error("Error creating profile:", profileError.message);
-    } else {
-      console.log("Profile created with referral code:", referralCode);
+    if (updateError) {
+      console.error("Error updating referral code:", updateError.message);
+      return null;
     }
+
+    return referralCode;
   }
-};
+
+  return data.referral_code;
+}
+
+export default function LoginPage() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [isSignUp, setIsSignUp] = useState(false);
+  const [loading, setLoading] = useState(false);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -53,25 +55,30 @@ const handleSignup = async (email: string, password: string) => {
     try {
       if (isSignUp) {
         // --- SIGN UP ---
-        const { error } = await supabase.auth.signUp({
-          email,
-          password,
-        });
-
+        const { data, error } = await supabase.auth.signUp({ email, password });
         if (error) throw error;
 
-        // IMPORTANT: don't navigate — wait for email verification
-        alert("Account created 🎉\nCheck your email to confirm your account.");
+        if (data.user) {
+          const userId = data.user.id;
+
+          // Insert or upsert profile
+          await supabase.from("profiles").upsert({ id: userId, email });
+
+          // Ensure referral code exists
+          await ensureReferralCode(userId);
+
+          alert("Account created 🎉\nCheck your email to confirm your account.");
+        }
       } else {
         // --- SIGN IN ---
-        const { error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
-
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
 
-        // Do NOT navigate here — let your global auth listener redirect
+        const { data } = await supabase.auth.getUser();
+        if (data.user) {
+          // Ensure referral code exists
+          await ensureReferralCode(data.user.id);
+        }
       }
     } catch (err: any) {
       alert(err?.message || "Something went wrong");
@@ -83,12 +90,10 @@ const handleSignup = async (email: string, password: string) => {
   // GOOGLE AUTH
   const handleGoogleSignIn = async () => {
     setLoading(true);
-
     try {
       await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          // Redirect back to login — avoids auto sending user elsewhere
           redirectTo: `${window.location.origin}/auth/callback`,
         },
       });
@@ -102,7 +107,6 @@ const handleSignup = async (email: string, password: string) => {
   return (
     <div className="fixed inset-0 bg-gradient-to-br from-[#8B2CF5] to-[#7C1EE6] flex items-center justify-center">
       <div className="w-full max-w-[420px] bg-white rounded-2xl shadow-xl px-8 py-10">
-
         {/* Header */}
         <h1 className="text-center text-[24px] font-bold text-[#7C1EE6]">
           {isSignUp ? "Create your flowwa account" : "Log in to flowwa"}
@@ -116,13 +120,9 @@ const handleSignup = async (email: string, password: string) => {
 
         {/* FORM */}
         <form onSubmit={handleSubmit} className="mt-8 space-y-6">
-
           {/* Email */}
           <div>
-            <label className="block text-left text-sm font-medium text-gray-900 mb-2">
-              Email
-            </label>
-
+            <label className="block text-left text-sm font-medium text-gray-900 mb-2">Email</label>
             <input
               type="email"
               value={email}
@@ -134,10 +134,7 @@ const handleSignup = async (email: string, password: string) => {
 
           {/* Password */}
           <div>
-            <label className="block text-left text-sm font-medium text-gray-900 mb-2">
-              Password
-            </label>
-
+            <label className="block text-left text-sm font-medium text-gray-900 mb-2">Password</label>
             <div className="relative">
               <input
                 type={showPassword ? "text" : "password"}
@@ -146,7 +143,6 @@ const handleSignup = async (email: string, password: string) => {
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full h-[48px] rounded-lg bg-[#EEF4FF] px-4 pr-14 text-sm outline-none focus:ring-2 focus:ring-purple-500"
               />
-
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
@@ -155,17 +151,6 @@ const handleSignup = async (email: string, password: string) => {
                 {showPassword ? "Hide" : "Show"}
               </button>
             </div>
-
-            {!isSignUp && (
-              <div className="flex justify-end mt-2">
-                <button
-                  type="button"
-                  className="text-sm text-purple-600 hover:underline"
-                >
-                  Forgot Password?
-                </button>
-              </div>
-            )}
           </div>
 
           {/* Submit */}
@@ -174,11 +159,7 @@ const handleSignup = async (email: string, password: string) => {
             disabled={loading}
             className="w-full h-[52px] rounded-full bg-[#8B2CF5] text-white font-semibold text-sm hover:opacity-90 transition disabled:opacity-60"
           >
-            {loading
-              ? "Please wait..."
-              : isSignUp
-              ? "Sign up"
-              : "Sign in"}
+            {loading ? "Please wait..." : isSignUp ? "Sign up" : "Sign in"}
           </button>
         </form>
 
@@ -189,7 +170,7 @@ const handleSignup = async (email: string, password: string) => {
           <div className="flex-1 h-px bg-gray-200" />
         </div>
 
-        {/* Google */}
+        {/* Google Sign-in */}
         <button
           onClick={handleGoogleSignIn}
           disabled={loading}
@@ -204,7 +185,6 @@ const handleSignup = async (email: string, password: string) => {
           Sign in with Google
         </button>
 
-        {/* Footer */}
         <p className="text-center text-sm text-gray-500 mt-6">
           {isSignUp ? "Already have an account?" : "Don’t have an account?"}{" "}
           <span
